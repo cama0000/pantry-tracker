@@ -277,6 +277,9 @@
 
 'use client'
 
+require('dotenv').config();
+
+
 import { Box, Button, Modal, Stack, TextField, Typography } from "@mui/material";
 import { firestore } from '@/firebase';
 import { collection, getDocs, getDoc, setDoc, doc, query, deleteDoc } from 'firebase/firestore';
