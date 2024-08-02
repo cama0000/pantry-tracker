@@ -224,7 +224,7 @@ export default function Home() {
         </div>
       </nav>
 
-      <Box
+      {/* <Box
         width="100vw"
         height="100vw"
         display={'flex'}
@@ -275,15 +275,6 @@ export default function Home() {
         </Button>
 
         <Box border={'3px solid white'}>
-          <Box width="800px" height="100px" bgcolor={'gray'}>
-            <Typography
-              variant={'h2'}
-              color={'black'}
-              textAlign={'center'}
-            >
-              Pantry Items
-            </Typography>
-          </Box>
           <Stack width="800px" height="400px" spacing={1} overflow={'auto'}>
             {searchResults.map((item) => (
               <Box
@@ -293,7 +284,8 @@ export default function Home() {
                 display={'flex'}
                 justifyContent={'space-between'}
                 alignItems={'center'}
-                bgcolor={'blue'}
+                // bgcolor={'blue'}
+                className="bg-gray-400"
                 padding={'5px'}
               >
                 <Typography
@@ -329,7 +321,140 @@ export default function Home() {
             ))}
           </Stack>
         </Box>
+      </Box> */}
+
+
+
+
+<Box
+  width="100vw"
+  height="100vw"
+  display={'flex'}
+  marginTop={'100px'}
+  flexDirection={'column'}
+  alignItems={'center'}
+  gap={2}
+>
+  <Modal
+    open={open}
+    onClose={handleClose}
+    aria-labelledby="modal-modal-title"
+    aria-describedby="modal-modal-description"
+  >
+    <Box sx={style}>
+      <Stack direction={'column'}>
+        <Typography id="modal-modal-title" variant="h6" component="h2">
+          Add Item
+        </Typography>
+
+        <Typography id="modal-modal-description" sx={{ mt: 2 }}>
+          Enter an item to add to your pantry.
+        </Typography>
+
+        <TextField
+          label="Item Name"
+          variant="outlined"
+          value={itemName}
+          onChange={(e) => setItemName(e.target.value)}
+        />
+
+        <Button
+          onClick={() => {
+            addItem(itemName);
+            setItemName('');
+            handleClose();
+          }}
+          variant="contained" style={{ marginTop: '12px' }}
+        >
+          Add
+        </Button>
+      </Stack>
+    </Box>
+  </Modal>
+
+  <Button onClick={handleOpen} variant="contained">
+    Add Item
+  </Button>
+
+  <Box border={'3px solid white'}>
+  {/* Header Row */}
+  <Box
+    width="100%"
+    display={'flex'}
+    justifyContent={'space-between'}
+    padding={'5px'}
+    bgcolor={'gray-200'}
+    className="text-lg font-semibold"
+  >
+    <Typography
+      variant={'h6'}
+      color={'white'}
+      textAlign={'center'}
+      flex={1}
+    >
+      Item Name
+    </Typography>
+    <Typography
+      variant={'h6'}
+      color={'white'}
+      textAlign={'center'}
+      flex={1}
+    >
+      Quantity
+    </Typography>
+  </Box>
+  {/* Items List */}
+  <Stack width="800px" height="400px" spacing={1} overflow={'auto'}>
+    {searchResults.map((item) => (
+      <Box
+        key={item.name}
+        width="100%"
+        height="200px"
+        display={'flex'}
+        justifyContent={'space-between'}
+        alignItems={'center'}
+        className="bg-gray-400"
+        padding={'5px'}
+      >
+        <Typography
+          variant={'body1'}  // Smaller text size
+          color={'black'}
+          textAlign={'center'}
+          flex={1}
+          sx={{ fontSize: 32 }}  // Optional: explicitly set font size if needed
+          style={{ fontFamily: 'Roboto Slab',  textAlign: 'center' }}
+        >
+          {item.name}
+        </Typography>
+
+        <Typography
+          variant={'body1'}  // Smaller text size
+          color={'black'}
+          textAlign={'center'}
+          flex={1}
+          sx={{ fontSize: 32 }}  // Optional: explicitly set font size if needed
+          style={{ fontFamily: 'Roboto Slab',  textAlign: 'center' }}
+
+        >
+          {item.count}
+        </Typography>
+
+        <Stack direction={'row'} spacing={2}>
+          <AddCircleIcon
+            onClick={() => addItem(item.name)}
+            className="text-blue-500 cursor-pointer transition-colors duration-300 hover:text-green-500"
+          />
+          <RemoveCircleIcon
+            onClick={() => removeItem(item.name)}
+            className="text-red-500 cursor-pointer transition-colors duration-300 hover:text-yellow-500"
+          />
+        </Stack>
       </Box>
+    ))}
+  </Stack>
+</Box>
+
+</Box>
     </div>
   );
 }
