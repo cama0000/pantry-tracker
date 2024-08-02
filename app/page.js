@@ -169,10 +169,15 @@ export default function Home() {
       {/* navbar */}
       <nav className="bg-gray-800 p-4">
         <div className="container mx-auto flex justify-between items-center">
-          <div className="text-white text-2xl font-bold">
-            <a href="/">PantryPal</a>
-          </div>
-          <img src="pantry-tracker/images/pantry.png" alt="pantry" />
+          <Stack direction={'row'} spacing={2}>
+            <div className="text-white text-2xl font-bold">
+              PantryPal
+            </div>
+            <img src="/images/pantry.png" alt="pantry" className="w-8 h-8" />
+          </Stack>
+
+
+
           <div className="lg:hidden">
             <button className="text-white">
               &#9776; {/* Hamburger icon */}
