@@ -1,283 +1,4 @@
-// 'use client'
-
-// import { Box, Button, Modal, Stack, TextField, Typography } from "@mui/material";
-// import {firestore} from '@/firebase'
-// import {collection, getDocs, getDoc, setDoc, doc, query, deleteDoc} from 'firebase/firestore'
-// import { useEffect, useState } from "react";
-// import AddCircleIcon from '@mui/icons-material/AddCircle';
-// import RemoveCircleIcon from '@mui/icons-material/RemoveCircle';
-
-// const style = {
-//   position: 'absolute',
-//   top: '50%',
-//   left: '50%',
-//   transform: 'translate(-50%, -50%)',
-//   width: 400,
-//   bgcolor: 'background.paper',
-//   color: 'black',
-//   border: '2px solid #000',
-//   boxShadow: 24,
-//   p: 4
-// }
-
-
-// export default function Home() {
-//   const [pantry, setPantry] = useState([])
-//   const [open, setOpen] = useState(false)
-//   const [itemName, setItemName] = useState('')
-//   const [searchItem, setSearchItem] = useState('')
-
-//   const updatePantry = async () => {
-//     const snapshot = query(collection(firestore, 'pantry'))
-//     const docs = await getDocs(snapshot)
-//     const pantryList = []
-
-//     docs.forEach((doc) => {
-//       console.log("DOC: " + doc)
-
-//       // each pantry item has a name and the rest of the data from that specific doc
-//       pantryList.push({
-//         name: doc.id,
-//         ...doc.data()
-//       })
-//     })
-//     setPantry(pantryList)
-//   }
-
-//   const addItem = async (itemName) =>{
-//     console.log("Adding item: " + itemName)
-//     const docRef = doc(firestore, 'pantry', itemName)
-//     const docSnap = await getDoc(docRef)
-
-//     if(docSnap.exists()){
-//       const {count} = docSnap.data()
-//       await setDoc(docRef, {count: count + 1})
-//     }
-//     else{
-//       await setDoc(docRef, {count: 1})
-//     }
-
-//     await updatePantry()
-//   }
-
-//   const removeItem = async (item) =>{
-//     // docRef is a reference to the specific document within the 'pantry' collection identified by item.
-//     const docRef = doc(firestore, 'pantry', item)
-//     // docSnap is the snapshot of the document fetched from Firestore using the reference docRef.
-//     const docSnap = await getDoc(docRef)
-
-//     if(docSnap.exists()){
-//       const {count} = docSnap.data()
-//       if(count === 1){
-//         await deleteDoc(docRef)
-//       }
-//       else{
-//         await setDoc(docRef, {count: count - 1})
-//       }
-//     }
-
-//     await updatePantry()
-//   }
-
-//   const handleSearch = async () => {
-
-//     if(searchItem != ''){
-//       try {
-//         console.log("Snapshot size ")
-
-//         const snapshot = await getDocs(collection(firestore, 'pantry'));
-//         const searchList = [];
-
-  
-//         snapshot.forEach((doc) => {
-//           console.log("DOC: " + doc.id)
-//           if(doc.id.toLowerCase().includes(searchItem.toLowerCase())){
-//             searchList.push({
-//               name: doc.id,
-//               ...doc.data()
-//             });
-
-//           }
-//         });
-  
-//         setPantry(searchList);
-//       } catch (error) {
-//         console.error("Error fetching search results: ", error);
-//       }
-//     }
-//     else{
-//       updatePantry();
-//     }
-//   }
-
-//   const handleOpen = () => {
-//     setOpen(true)
-//   }
-
-//   const handleClose = () => {
-//     setOpen(false)
-//   }
-
-//   useEffect(() => {
-//     updatePantry()
-//   }, [])
-
-//   // searches immediately after putting name
-//   useEffect(()=>{
-//     handleSearch();
-//   }, [searchItem]);
-
-//   return (
-
-//     <Box
-//       width="100vw"
-//       height="100vw"
-//       display={'flex'}
-//       justifyContent={'center'}
-//       flexDirection={'column'}
-//       alignItems={'center'}
-//       gap={2}
-//     >
-//         <Modal
-//           open={open}
-//           onClose={handleClose}
-//           aria-labelledby="modal-modal-title"
-//           aria-describedby="modal-modal-description"
-//         >
-//           <Box sx={style}>
-//             <Stack direction={'column'}>
-//               <Typography id="modal-modal-title" variant="h6" component="h2">
-//                 Add Item
-//               </Typography>
-
-//               <Typography id="modal-modal-description" sx={{ mt: 2 }}>
-//                 Enter an item to add to your pantry.
-//               </Typography>
-
-//               <TextField 
-//               label="Item Name"
-//                 variant="outlined"
-//                 value={itemName}
-//                 onChange={(e) => setItemName(e.target.value)}>
-                
-//               </TextField>
-
-//               <Button 
-//               onClick={() => {
-//                   addItem(itemName)
-//                   setItemName('')
-//                   handleClose()
-//                 }}
-//                 variant="contained" style={{marginTop: '12px'}}>
-//                   Add
-//               </Button>
-//             </Stack>
-//           </Box>
-//         </Modal>
-
-
-
-
-
-//       <Button onClick={handleOpen} variant="contained">
-//         Add Item
-//       </Button>
-
-//       <TextField
-//                 autoFocus
-//                 margin="dense"
-//                 id="search"
-//                 name="search"
-//                 label="Search"
-//                 type="search"
-//                 width="100%"
-//                 variant="outlined"
-//                 value={searchItem}
-//                 onChange={(e) => {
-//                   console.log("E TARGETT VALUE: " + e.target.value)
-//                   setSearchItem(e.target.value);
-//                   // handleSearch();
-//                 }}
-//                 InputProps={{
-//                   style: { color: 'white' }, // Text color inside the input
-//                 }}
-//                 InputLabelProps={{
-//                   style: { color: 'white' } // Label color
-//                 }}
-//               />
-//       <Box border={'3px solid white'}>
-//       <Box
-//       width="800px"
-//       height="100px"
-//       bgcolor={'gray'}
-//       >
-//           <Typography
-//               variant={'h2'}
-//               color={'black'}
-//               textAlign={'center'}
-//             >
-//               Pantry Items
-//             </Typography>
-
-//       </Box>
-//       <Stack width="800px" height="400px" spacing={1} overflow={'auto'}>
-//         {pantry.map((item) =>(
-//           <Box
-//             key={item.name}
-//             width="100%"
-//             height="200px"
-//             display={'flex'}
-//             justifyContent={'space-between'}
-//             alignItems={'center'}
-//             bgcolor={'blue'}
-//             padding={'5px'}
-//           >
-//               <Typography
-//                 variant={'h3'}
-//                 color={'black'}
-//                 textAlign={'center'}
-//                 fontWeight={'bold'}
-//               >
-//               {item.name}
-//               </Typography>
-
-//               <Typography
-//                 variant={'h3'}
-//                 color={'black'}
-//                 textAlign={'center'}
-//                 fontWeight={'bold'}
-//                 marginRight = {'12px'}
-//               >
-//               {item.count}
-//               </Typography>
-
-//               <Stack direction={'row'} spacing={2}>
-//               <AddCircleIcon
-//         onClick={() => addItem(item.name)}
-//         className="text-blue-500 cursor-pointer transition-colors duration-300 hover:text-green-500"
-//       />
-//       <RemoveCircleIcon
-//         onClick={() => removeItem(item.name)}
-//         className="text-red-500 cursor-pointer transition-colors duration-300 hover:text-yellow-500"
-//       />
-//               </Stack>
-
-              
-            
-//           </Box>
-//         ))}
-//       </Stack>
-//       </Box>
-//     </Box>
-//   );
-// }
-
-
-
-
 'use client'
-
-require('dotenv').config();
 
 
 import { Box, Button, Modal, Stack, TextField, Typography } from "@mui/material";
@@ -286,6 +7,9 @@ import { collection, getDocs, getDoc, setDoc, doc, query, deleteDoc } from 'fire
 import { useEffect, useState } from "react";
 import AddCircleIcon from '@mui/icons-material/AddCircle';
 import RemoveCircleIcon from '@mui/icons-material/RemoveCircle';
+import OpenAI from 'openai';
+import Navbar from "./components/navbar";
+// import { OPENAI_API_KEY } from './config';
 
 const style = {
   position: 'absolute',
@@ -300,12 +24,65 @@ const style = {
   p: 4
 }
 
+
+const client = new OpenAI({
+  apiKey: process.env.NEXT_PUBLIC_OPENAI_API_KEY,
+  dangerouslyAllowBrowser: true 
+});
+
 export default function Home() {
   const [pantry, setPantry] = useState([]);
   const [searchResults, setSearchResults] = useState([]);
   const [open, setOpen] = useState(false);
   const [itemName, setItemName] = useState('');
   const [searchItem, setSearchItem] = useState('');
+
+  const getPantryItems = async () => {
+    const itemNames = [];
+
+    try{
+      const snapshot = query(collection(firestore, 'pantry'));
+      const docs = await getDocs(snapshot);
+  
+      docs.forEach((doc) => {
+        itemNames.push(doc.id);
+      });
+    }
+    catch(error){
+      console.error("Error fetching item names: ", error);
+    }
+
+    return itemNames;
+  }
+
+  const generateRecipe = async () =>{
+    const ingredients = (await getPantryItems()).join(', ');
+
+    console.log("INGRE: " + ingredients)
+
+    const prompt =  `Here is a list of ingredients I have: ${ingredients}. Please suggest a recipe that can be made using these ingredients.`;
+
+    try{
+      const params = {
+        messages: [{ role: 'user', content: `${prompt}` }],
+        model: 'gpt-3.5-turbo',
+      };
+
+      const chatCompletion = await client.chat.completions.create(params);
+
+      return chatCompletion.data.choices[0].message.content.trim();
+    }
+    catch (error) {
+      console.error('Error fetching recipe suggestion:', error);
+      return 'Sorry, I could not generate a recipe at this time.';
+    }
+
+  }
+
+  const displayRecipe = async () => {
+    const recipe = await generateRecipe();
+    alert(recipe);
+  }
 
   const updatePantry = async () => {
     const snapshot = query(collection(firestore, 'pantry'));
@@ -393,15 +170,78 @@ export default function Home() {
   }, [searchItem]);
 
   return (
+    <div>
+      {/* navbar */}
+      <nav className="bg-gray-800 p-4">
+      <div className="container mx-auto flex justify-between items-center">
+        <div className="text-white text-2xl font-bold">
+          <a href="/">PantryPal</a>
+        </div>
+        {/* come back to this when you have free trial */}
+        <img src="pantry-tracker/images/pantry.png" alt="pantry" />
+        <div className="lg:hidden">
+          <button className="text-white">
+            &#9776; {/* Hamburger icon */}
+          </button>
+        </div>
+        <ul className={`lg:flex lg:items-center lg:space-x-6 lg:block`}>
+          <li>
+            {/* search bar */}
+          <TextField
+        autoFocus
+        margin="dense"
+        id="search"
+        name="search"
+        label="Search"
+        type="search"
+        width="100%"
+        variant="outlined"
+        value={searchItem}
+        onChange={(e) => {
+          setSearchItem(e.target.value);
+        }}
+        InputProps={{
+          style: { color: 'white' },
+        }}
+        InputLabelProps={{
+          style: { color: 'white' }
+        }}
+        sx={{
+          '& .MuiOutlinedInput-root': {
+            '& fieldset': {
+              borderColor: 'white',
+            },
+            '&:hover fieldset': {
+              borderColor: 'white',
+            },
+            '&.Mui-focused fieldset': {
+              borderColor: 'white',
+            },
+          },
+        }}
+      />
+            
+          </li>
+        </ul>
+      </div>
+    </nav>
+
     <Box
       width="100vw"
       height="100vw"
       display={'flex'}
-      justifyContent={'center'}
+      marginTop={'100px'}
+      // justifyContent={'center'}
       flexDirection={'column'}
       alignItems={'center'}
       gap={2}
     >
+
+
+
+{/* <Button onClick={displayRecipe}>
+      Display Recipe
+    </Button> */}
       <Modal
         open={open}
         onClose={handleClose}
@@ -439,11 +279,15 @@ export default function Home() {
         </Box>
       </Modal>
 
+      
+
       <Button onClick={handleOpen} variant="contained">
         Add Item
       </Button>
 
-      <TextField
+
+      {/* search items */}
+      {/* <TextField
         autoFocus
         margin="dense"
         id="search"
@@ -475,7 +319,7 @@ export default function Home() {
             },
           },
         }}
-      />
+      /> */}
 
       <Box border={'3px solid white'}>
         <Box width="800px" height="100px" bgcolor={'gray'}>
@@ -533,5 +377,8 @@ export default function Home() {
         </Stack>
       </Box>
     </Box>
+
+    </div>
+
   );
 }
