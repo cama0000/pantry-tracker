@@ -7,7 +7,6 @@ import { collection, getDocs, getDoc, setDoc, doc, query, deleteDoc } from 'fire
 import AddCircleIcon from '@mui/icons-material/AddCircle';
 import RemoveCircleIcon from '@mui/icons-material/RemoveCircle';
 import OpenAI from 'openai';
-import Navbar from "./components/navbar";
 
 import { ToastContainer } from 'react-toastify';
 import { toast } from 'react-toastify';
@@ -224,111 +223,12 @@ export default function Home() {
         </div>
       </nav>
 
-      {/* <Box
-        width="100vw"
-        height="100vw"
-        display={'flex'}
-        marginTop={'100px'}
-        flexDirection={'column'}
-        alignItems={'center'}
-        gap={2}
-      >
-        <Modal
-          open={open}
-          onClose={handleClose}
-          aria-labelledby="modal-modal-title"
-          aria-describedby="modal-modal-description"
-        >
-          <Box sx={style}>
-            <Stack direction={'column'}>
-              <Typography id="modal-modal-title" variant="h6" component="h2">
-                Add Item
-              </Typography>
-
-              <Typography id="modal-modal-description" sx={{ mt: 2 }}>
-                Enter an item to add to your pantry.
-              </Typography>
-
-              <TextField
-                label="Item Name"
-                variant="outlined"
-                value={itemName}
-                onChange={(e) => setItemName(e.target.value)}
-              />
-
-              <Button
-                onClick={() => {
-                  addItem(itemName);
-                  setItemName('');
-                  handleClose();
-                }}
-                variant="contained" style={{ marginTop: '12px' }}
-              >
-                Add
-              </Button>
-            </Stack>
-          </Box>
-        </Modal>
-
-        <Button onClick={handleOpen} variant="contained">
-          Add Item
-        </Button>
-
-        <Box border={'3px solid white'}>
-          <Stack width="800px" height="400px" spacing={1} overflow={'auto'}>
-            {searchResults.map((item) => (
-              <Box
-                key={item.name}
-                width="100%"
-                height="200px"
-                display={'flex'}
-                justifyContent={'space-between'}
-                alignItems={'center'}
-                // bgcolor={'blue'}
-                className="bg-gray-400"
-                padding={'5px'}
-              >
-                <Typography
-                  variant={'h3'}
-                  color={'black'}
-                  textAlign={'center'}
-                  fontWeight={'bold'}
-                >
-                  {item.name}
-                </Typography>
-
-                <Typography
-                  variant={'h3'}
-                  color={'black'}
-                  textAlign={'center'}
-                  fontWeight={'bold'}
-                  marginRight={'12px'}
-                >
-                  {item.count}
-                </Typography>
-
-                <Stack direction={'row'} spacing={2}>
-                  <AddCircleIcon
-                    onClick={() => addItem(item.name)}
-                    className="text-blue-500 cursor-pointer transition-colors duration-300 hover:text-green-500"
-                  />
-                  <RemoveCircleIcon
-                    onClick={() => removeItem(item.name)}
-                    className="text-red-500 cursor-pointer transition-colors duration-300 hover:text-yellow-500"
-                  />
-                </Stack>
-              </Box>
-            ))}
-          </Stack>
-        </Box>
-      </Box> */}
-
 
 
 
 <Box
   width="100vw"
-  height="100vw"
+  height="50vw"
   display={'flex'}
   marginTop={'100px'}
   flexDirection={'column'}
@@ -346,6 +246,7 @@ export default function Home() {
         <Typography id="modal-modal-title" variant="h6" component="h2">
           Add Item
         </Typography>
+
 
         <Typography id="modal-modal-description" sx={{ mt: 2 }}>
           Enter an item to add to your pantry.
@@ -372,9 +273,13 @@ export default function Home() {
     </Box>
   </Modal>
 
-  <Button onClick={handleOpen} variant="contained">
-    Add Item
-  </Button>
+  <AddCircleIcon
+  onClick={handleOpen}
+  className='h-16 w-16 bg-blue-500 text-white rounded-full cursor-pointer transition-transform duration-300 ease-in-out hover:scale-105'
+/>
+
+
+
 
   <Box border={'3px solid white'}>
   {/* Header Row */}
@@ -416,16 +321,21 @@ export default function Home() {
         className="bg-gray-400"
         padding={'5px'}
       >
-        <Typography
-          variant={'body1'}  // Smaller text size
-          color={'black'}
-          textAlign={'center'}
-          flex={1}
-          sx={{ fontSize: 32 }}  // Optional: explicitly set font size if needed
-          style={{ fontFamily: 'Roboto Slab',  textAlign: 'center' }}
-        >
-          {item.name}
-        </Typography>
+<Typography
+  variant={'body1'}
+  color={'black'}
+  textAlign={'center'}
+  flex={1}
+  sx={{ 
+    fontSize: 32,  // Optional: explicitly set font size if needed
+    fontFamily: 'Roboto Slab',
+    overflow: 'hidden',          // Hide overflow text
+    textOverflow: 'ellipsis',     // Show ellipsis when text overflows
+    whiteSpace: 'nowrap',         // Prevent text from wrapping to the next line
+  }}
+>
+  {item.name}
+</Typography>
 
         <Typography
           variant={'body1'}  // Smaller text size
@@ -433,7 +343,7 @@ export default function Home() {
           textAlign={'center'}
           flex={1}
           sx={{ fontSize: 32 }}  // Optional: explicitly set font size if needed
-          style={{ fontFamily: 'Roboto Slab',  textAlign: 'center' }}
+          style={{ fontFamily: 'Roboto Slab',  textAlign: 'center'}}
 
         >
           {item.count}
