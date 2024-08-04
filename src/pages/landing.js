@@ -17,6 +17,10 @@ import { useAuth } from '../context/AuthContext';
 import 'react-toastify/dist/ReactToastify.css';
 import ProtectedRoutes from './components/ProtectedRoutes';
 
+// firebase storage
+import { storage } from '../../firebase';
+import { ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
+
 const style = {
   position: 'absolute',
   top: '50%',
@@ -40,8 +44,25 @@ export default function Home() {
   const [searchResults, setSearchResults] = useState([]);
   const [open, setOpen] = useState(false);
   const [itemName, setItemName] = useState('');
+  const [imageFile, setImageFile] = useState(null);
   const [searchItem, setSearchItem] = useState('');
   const {user, signOut} = useAuth();
+
+  const handleFileChange = (event) => {
+    setImageFile(event.target.files[0]);
+  };
+
+  const uploadImage = async (file) => {
+    try{
+      const storageRef = ref(storage, 'images/' + file.name);
+      await uploadBytes(storageRef, file);
+      return getDownloadURL(storageRef);
+    }
+    catch(error){
+      console.error("Error uploading image: ", error);
+      return '/images/pantry.png';
+    }
+  };
 
   const getPantryItems = async () => {
     const itemNames = [];
@@ -100,28 +121,37 @@ export default function Home() {
     setSearchResults(pantryList);
   };
 
-  const addItem = async (itemName) => {
+  const addItem = async (itemName, imageUrl) => {
     const docRef = doc(firestore, 'users', user.uid, 'items', itemName);
     const docSnap = await getDoc(docRef);
+
+    if(imageUrl === undefined || imageUrl === null){
+      imageUrl = '/images/pantry.png';
+    }
+    else{
+      imageUrl = await uploadImage(imageFile);
+    }
+
+    console.log("IMAGE URL: " + imageUrl);
 
     try{
       if(docSnap.exists()) {
         const { count } = docSnap.data();
-        await setDoc(docRef, { count: count + 1 });
+        await setDoc(docRef, { count: count + 1});
   
         setPantry(prevPantry => prevPantry.map(item =>
           item.name === itemName ? { ...item, count: count + 1 } : item
         ));
   
         setSearchResults(prevSearchResults => prevSearchResults.map(item =>
-          item.name === itemName ? { ...item, count: count + 1 } : item
+          item.name === itemName ? { ...item, count: count + 1} : item
         ));
   
       }
       else {
-        await setDoc(docRef, { count: 1 });
-        setPantry(prevPantry => [...prevPantry, { name: itemName, count: 1 }]);
-        setSearchResults(prevSearchResults => [...prevSearchResults, { name: itemName, count: 1 }]);
+        await setDoc(docRef, { count: 1, image: `${imageUrl}` });
+        setPantry(prevPantry => [...prevPantry, { name: itemName, count: 1, image: `${imageUrl}` }]);
+        setSearchResults(prevSearchResults => [...prevSearchResults, { name: itemName, count: 1, image: `${imageUrl}` }]);
       }
   
       toast.success(`${itemName} added to pantry!`);
@@ -139,7 +169,19 @@ export default function Home() {
 
     try{
       if(docSnap.exists()) {
-        const { count } = docSnap.data();
+        // const { count } = docSnap.data();
+
+        const { count, image } = docSnap.data();
+
+        // Construct the path to the image file in the 'images' folder
+        if (image) {
+          console.log("IMAGE URL: " + image);
+            const imageRef = ref(storage, `${image}`);
+            await deleteObject(imageRef).catch((error) => {
+                console.error("Error deleting image: ", error);
+                toast.error(`Unable to delete image for ${itemName}`);
+            });
+        }
   
         if(count === 1) {
           await deleteDoc(docRef);
@@ -297,10 +339,16 @@ export default function Home() {
           onChange={(e) => setItemName(e.target.value)}
         />
 
+        <input
+            type="file"
+            onChange={handleFileChange}
+        />
+
         <Button
           onClick={() => {
-            addItem(itemName);
+            addItem(itemName, imageFile);
             setItemName('');
+            setImageFile(null);
             handleClose();
           }}
           variant="contained" style={{ marginTop: '12px' }}
@@ -359,7 +407,9 @@ export default function Home() {
         className="bg-gray-400"
         padding={'5px'}
       >
-        <img src="/images/pantry.png" alt="pantry" className="w-16 h-16" />
+
+        <img src={item.image} alt="pantry" className="w-32 h-32" />
+
 <Typography
   variant={'body1'}
   color={'black'}
