@@ -82,16 +82,10 @@ export default function Home() {
   };
 
   const updatePantry = async () => {
-    // const snapshot = query(collection(firestore, 'pantry'));
-    // const docs = await getDocs(snapshot);
-    // const pantryList = [];
-
-    
     const pantryList = [];
     const pantryCollectionRef = collection(firestore, 'users', user.uid, 'items');
     const pantryQuery = query(pantryCollectionRef);
 
-    // Fetch documents from the user's pantry
     const docs = await getDocs(pantryQuery);
 
     docs.forEach((doc) => {
@@ -106,49 +100,70 @@ export default function Home() {
   };
 
   const addItem = async (itemName) => {
-    const docRef = doc(firestore, 'pantry', itemName);
+    const docRef = doc(firestore, 'users', user.uid, 'items', itemName);
     const docSnap = await getDoc(docRef);
 
-    if (docSnap.exists()) {
-      const { count } = docSnap.data();
-      await setDoc(docRef, { count: count + 1 });
-      setPantry(prevPantry => prevPantry.map(item =>
-        item.name === itemName ? { ...item, count: count + 1 } : item
-      ));
-      setSearchResults(prevSearchResults => prevSearchResults.map(item =>
-        item.name === itemName ? { ...item, count: count + 1 } : item
-      ));
-    } else {
-      await setDoc(docRef, { count: 1 });
-      setPantry(prevPantry => [...prevPantry, { name: itemName, count: 1 }]);
-      setSearchResults(prevSearchResults => [...prevSearchResults, { name: itemName, count: 1 }]);
+    try{
+      if(docSnap.exists()) {
+        const { count } = docSnap.data();
+        await setDoc(docRef, { count: count + 1 });
+  
+        setPantry(prevPantry => prevPantry.map(item =>
+          item.name === itemName ? { ...item, count: count + 1 } : item
+        ));
+  
+        setSearchResults(prevSearchResults => prevSearchResults.map(item =>
+          item.name === itemName ? { ...item, count: count + 1 } : item
+        ));
+  
+      }
+      else {
+        await setDoc(docRef, { count: 1 });
+        setPantry(prevPantry => [...prevPantry, { name: itemName, count: 1 }]);
+        setSearchResults(prevSearchResults => [...prevSearchResults, { name: itemName, count: 1 }]);
+      }
+  
+      toast.success(`${itemName} added to pantry!`);
     }
-
-    toast.success(`${itemName} added to pantry!`);
+    catch(error){
+      console.error("Error adding item: ", error);
+      toast.error(`Unable to add ${itemName} to pantry`);
+    }
+    
   };
 
   const removeItem = async (itemName) => {
-    const docRef = doc(firestore, 'pantry', itemName);
+    const docRef = doc(firestore, 'users', user.uid, 'items', itemName);
     const docSnap = await getDoc(docRef);
 
-    if (docSnap.exists()) {
-      const { count } = docSnap.data();
-      if (count === 1) {
-        await deleteDoc(docRef);
-        setPantry(prevPantry => prevPantry.filter(item => item.name !== itemName));
-        setSearchResults(prevSearchResults => prevSearchResults.filter(item => item.name !== itemName));
-
-        toast.success(`${itemName} removed from pantry!`);
-      } else {
-        await setDoc(docRef, { count: count - 1 });
-        setPantry(prevPantry => prevPantry.map(item =>
-          item.name === itemName ? { ...item, count: count - 1 } : item
-        ));
-        setSearchResults(prevSearchResults => prevSearchResults.map(item =>
-          item.name === itemName ? { ...item, count: count - 1 } : item
-        ));
+    try{
+      if(docSnap.exists()) {
+        const { count } = docSnap.data();
+  
+        if(count === 1) {
+          await deleteDoc(docRef);
+  
+          setPantry(prevPantry => prevPantry.filter(item => item.name !== itemName));
+          setSearchResults(prevSearchResults => prevSearchResults.filter(item => item.name !== itemName));
+  
+          toast.success(`${itemName} removed from pantry!`);
+        }
+        else {
+          await setDoc(docRef, { count: count - 1 });
+          setPantry(prevPantry => prevPantry.map(item =>
+            item.name === itemName ? { ...item, count: count - 1 } : item
+          ));
+          setSearchResults(prevSearchResults => prevSearchResults.map(item =>
+            item.name === itemName ? { ...item, count: count - 1 } : item
+          ));
+        }
       }
     }
+    catch(error){
+      console.error("Error removing item: ", error);
+      toast.error(`Unable to remove ${itemName} from pantry`);
+    }
+    
   };
 
   const handleSearch = async () => {
