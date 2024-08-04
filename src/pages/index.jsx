@@ -8,7 +8,7 @@ import GoogleIcon from '@mui/icons-material/Google';
 
 
 
-const index = () => {
+const Index = () => {
   const router = useRouter();
 
   const handleGoogle = async (e) => {
@@ -41,7 +41,6 @@ const index = () => {
 
         <div className="mt-2 max-w-2xl text-center">
             <span className="text-lg mb-5 block">
-                Wave is your one-stop solution to studying and tracking deadlines.
             </span>
         </div>
       </div>
@@ -50,4 +49,4 @@ const index = () => {
   );
 }
 
-export default index;
+export default Index;
