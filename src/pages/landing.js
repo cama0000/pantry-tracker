@@ -11,7 +11,10 @@ import OpenAI from 'openai';
 import { ToastContainer } from 'react-toastify';
 import { toast } from 'react-toastify';
 
+import { useAuth } from '../context/AuthContext';
+
 import 'react-toastify/dist/ReactToastify.css';
+import ProtectedRoutes from './components/ProtectedRoutes';
 
 const style = {
   position: 'absolute',
@@ -37,6 +40,7 @@ export default function Home() {
   const [open, setOpen] = useState(false);
   const [itemName, setItemName] = useState('');
   const [searchItem, setSearchItem] = useState('');
+  const {user, signOut} = useAuth();
 
   const getPantryItems = async () => {
     const itemNames = [];
@@ -161,7 +165,8 @@ export default function Home() {
   }, [searchItem]);
 
   return (
-    
+
+    <ProtectedRoutes>    
     <div className="overflow-x-hidden">
       <ToastContainer limit={5} />
 
@@ -278,6 +283,12 @@ export default function Home() {
   className='h-16 w-16 bg-blue-500 text-white rounded-full cursor-pointer transition-transform duration-300 ease-in-out hover:scale-105'
 />
 
+{user ? <p>Welcome, {user.email}</p> : <p>Please log in</p>}
+
+<Button onClick={signOut}>
+  Sign Out
+</Button>
+
 
 
 
@@ -366,5 +377,8 @@ export default function Home() {
 
 </Box>
     </div>
+
+    </ProtectedRoutes>
+
   );
 }
