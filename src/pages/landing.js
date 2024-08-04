@@ -6,6 +6,7 @@ import { firestore } from '@/firebase';
 import { collection, getDocs, getDoc, setDoc, doc, query, deleteDoc } from 'firebase/firestore';
 import AddCircleIcon from '@mui/icons-material/AddCircle';
 import RemoveCircleIcon from '@mui/icons-material/RemoveCircle';
+import ExitToAppIcon from '@mui/icons-material/ExitToApp';
 import OpenAI from 'openai';
 
 import { ToastContainer } from 'react-toastify';
@@ -208,7 +209,7 @@ export default function Home() {
 
           <div className="lg:hidden">
             <button className="text-white">
-              &#9776; {/* Hamburger icon */}
+              &#9776;
             </button>
           </div>
           <ul className="lg:flex lg:items-center lg:space-x-6 lg:block">
@@ -247,6 +248,14 @@ export default function Home() {
                   },
                 }}
               />
+            </li>
+
+            <li>
+              {user ? <p>{user.email}</p> : <p>Please log in</p>}
+            </li>
+
+            <li>
+              <ExitToAppIcon onClick={signOut} className="text-white cursor-pointer hover:text-blue-400" />
             </li>
           </ul>
         </div>
@@ -307,12 +316,6 @@ export default function Home() {
   className='h-16 w-16 bg-blue-500 text-white rounded-full cursor-pointer transition-transform duration-300 ease-in-out hover:scale-105'
 />
 
-{user ? <p>Welcome, {user.email}</p> : <p>Please log in</p>}
-
-<Button onClick={signOut}>
-  Sign Out
-</Button>
-
 
 
 
@@ -356,6 +359,7 @@ export default function Home() {
         className="bg-gray-400"
         padding={'5px'}
       >
+        <img src="/images/pantry.png" alt="pantry" className="w-16 h-16" />
 <Typography
   variant={'body1'}
   color={'black'}
