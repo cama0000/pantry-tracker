@@ -174,7 +174,7 @@ export default function Home() {
         const { count, image } = docSnap.data();
 
         // Construct the path to the image file in the 'images' folder
-        if (image) {
+        if(image && image !== '/images/pantry.png'){
           console.log("IMAGE URL: " + image);
             const imageRef = ref(storage, `${image}`);
             await deleteObject(imageRef).catch((error) => {
