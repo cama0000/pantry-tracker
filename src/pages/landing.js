@@ -82,9 +82,17 @@ export default function Home() {
   };
 
   const updatePantry = async () => {
-    const snapshot = query(collection(firestore, 'pantry'));
-    const docs = await getDocs(snapshot);
+    // const snapshot = query(collection(firestore, 'pantry'));
+    // const docs = await getDocs(snapshot);
+    // const pantryList = [];
+
+    
     const pantryList = [];
+    const pantryCollectionRef = collection(firestore, 'users', user.uid, 'items');
+    const pantryQuery = query(pantryCollectionRef);
+
+    // Fetch documents from the user's pantry
+    const docs = await getDocs(pantryQuery);
 
     docs.forEach((doc) => {
       pantryList.push({
@@ -92,6 +100,7 @@ export default function Home() {
         ...doc.data()
       });
     });
+    
     setPantry(pantryList);
     setSearchResults(pantryList);
   };
