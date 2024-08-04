@@ -122,6 +122,11 @@ export default function Home() {
   };
 
   const addItem = async (itemName, imageUrl) => {
+    if(itemName === ''){
+      toast.error('Please enter an item name.');
+      return;
+    }
+
     const docRef = doc(firestore, 'users', user.uid, 'items', itemName);
     const docSnap = await getDoc(docRef);
 
@@ -169,11 +174,9 @@ export default function Home() {
 
     try{
       if(docSnap.exists()) {
-        // const { count } = docSnap.data();
-
         const { count, image } = docSnap.data();
 
-        // Construct the path to the image file in the 'images' folder
+        // delete image from storage if not default image
         if(image && image !== '/images/pantry.png'){
           console.log("IMAGE URL: " + image);
             const imageRef = ref(storage, `${image}`);
@@ -328,7 +331,7 @@ export default function Home() {
         </Typography>
 
 
-        <Typography id="modal-modal-description" sx={{ mt: 2 }}>
+        <Typography id="modal-modal-description" sx={{ mt: 2, mb: 3}}>
           Enter an item to add to your pantry.
         </Typography>
 
@@ -342,6 +345,7 @@ export default function Home() {
         <input
             type="file"
             onChange={handleFileChange}
+            className='mt-4'
         />
 
         <Button
