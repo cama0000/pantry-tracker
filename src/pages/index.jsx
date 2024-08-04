@@ -4,6 +4,7 @@ import React from 'react';
 import { GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
 import {auth} from '../../firebase';
 import { useRouter } from 'next/router';
+import GoogleIcon from '@mui/icons-material/Google';
 
 
 
@@ -26,15 +27,16 @@ const index = () => {
 
       <div className="flex-grow content flex flex-col items-center mt-40">
         <span className="font-bold text-4xl mb-5 text-center">
-          Be seamlessly productive.
+          Track items, easier.
         </span>
 
         <Button onClick={handleGoogle} variant="contained" color="primary" style={{ backgroundColor: 'purple', color: 'white' }}>
-          Sign in with Google
+          <GoogleIcon className="mr-2" />
+          Sign In
         </Button>
 
         <span className="font-bold text-4xl mt-20 mb-5 text-center">
-          What is Wave?
+          What is PantryPal?
         </span>
 
         <div className="mt-2 max-w-2xl text-center">
