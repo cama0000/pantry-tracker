@@ -22,6 +22,9 @@ import { storage } from '../../firebase';
 import { ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
 
 import {Camera} from "react-camera-pro";
+import CameraAltIcon from '@mui/icons-material/CameraAlt';
+import CameraEnhanceIcon from '@mui/icons-material/CameraEnhance';
+import CancelPresentationIcon from '@mui/icons-material/CancelPresentation';
 
 const style = {
   position: 'absolute',
@@ -400,15 +403,19 @@ export default function Home() {
           setCameraPhotoUrl(null)
         }
         }>
-          Camera
+          <CameraAltIcon />
         </Button>
         )}
 
         {cameraOpen && (
         <div className="mt-4">
           <Camera ref={camera} aspectRatio={4 / 3} />
-          <Button onClick={handleTakePhoto}>Take Photo</Button>
-          <Button onClick={() => setCameraOpen(false)}>Close Camera</Button>
+          <Button onClick={handleTakePhoto}>
+            <CameraEnhanceIcon />
+          </Button>
+          <Button onClick={() => setCameraOpen(false)}>
+            <CancelPresentationIcon />
+          </Button>
         </div>
        )}
 
