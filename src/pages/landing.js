@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Box, Button, Modal, Stack, TextField, Typography } from "@mui/material";
 import { firestore } from '@/firebase';
 import { collection, getDocs, getDoc, setDoc, doc, query, deleteDoc } from 'firebase/firestore';
@@ -20,6 +20,8 @@ import ProtectedRoutes from './components/ProtectedRoutes';
 // firebase storage
 import { storage } from '../../firebase';
 import { ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
+
+import {Camera} from "react-camera-pro";
 
 const style = {
   position: 'absolute',
@@ -47,10 +49,44 @@ export default function Home() {
   const [imageFile, setImageFile] = useState(null);
   const [searchItem, setSearchItem] = useState('');
   const {user, signOut} = useAuth();
+  const camera = useRef(null);
+  const [cameraOpen, setCameraOpen] = useState(false);
+  const [photoTaken, setPhotoTaken] = useState(false);
+  const [cameraPhotoUrl, setCameraPhotoUrl] = useState(null);
+
+  const dataURLtoFile = (dataUrl, fileName) => {
+    const arr = dataUrl.split(",");
+    const mime = arr[0].match(/:(.*?);/)[1];
+    const bstr = atob(arr[1]);
+    let n = bstr.length;
+    const u8arr = new Uint8Array(n);
+  
+    while (n--) {
+      u8arr[n] = bstr.charCodeAt(n);
+    }
+  
+    return new File([u8arr], fileName, { type: mime });
+  };
 
   const handleFileChange = (event) => {
     setImageFile(event.target.files[0]);
+    setPhotoTaken(false);
+    setCameraPhotoUrl(null);
   };
+
+  const handleTakePhoto = () =>{
+    const photoUrl = camera.current.takePhoto();
+    setCameraPhotoUrl(photoUrl);
+
+    const timestamp = new Date().toISOString().replace(/[-:.]/g, "");
+    const fileName = `photo_${timestamp}.jpg`;
+    const photoFile = dataURLtoFile(photoUrl, fileName);
+
+    console.log("PHOTO FILE: " + photoFile);
+    setImageFile(photoFile);
+    setPhotoTaken(true);
+    setCameraOpen(false);
+  }
 
   const uploadImage = async (file) => {
     try{
@@ -122,6 +158,8 @@ export default function Home() {
   };
 
   const addItem = async (itemName, imageUrl) => {
+    console.log("IMAGE URL FIRST RIGHT AFTER PHOTO: " + imageUrl);
+
     if(itemName === ''){
       toast.error('Please enter an item name.');
       return;
@@ -129,6 +167,11 @@ export default function Home() {
 
     const docRef = doc(firestore, 'users', user.uid, 'items', itemName);
     const docSnap = await getDoc(docRef);
+
+    if(docSnap.exists()){
+      toast.error(`${itemName} already exists in pantry!`);
+      return;
+    }
 
     if(imageUrl === undefined || imageUrl === null){
       imageUrl = '/images/pantry.png';
@@ -140,26 +183,10 @@ export default function Home() {
     console.log("IMAGE URL: " + imageUrl);
 
     try{
-      if(docSnap.exists()) {
-        const { count } = docSnap.data();
-        await setDoc(docRef, { count: count + 1});
-  
-        setPantry(prevPantry => prevPantry.map(item =>
-          item.name === itemName ? { ...item, count: count + 1 } : item
-        ));
-  
-        setSearchResults(prevSearchResults => prevSearchResults.map(item =>
-          item.name === itemName ? { ...item, count: count + 1} : item
-        ));
-  
-      }
-      else {
         await setDoc(docRef, { count: 1, image: `${imageUrl}` });
         setPantry(prevPantry => [...prevPantry, { name: itemName, count: 1, image: `${imageUrl}` }]);
         setSearchResults(prevSearchResults => [...prevSearchResults, { name: itemName, count: 1, image: `${imageUrl}` }]);
-      }
-  
-      toast.success(`${itemName} added to pantry!`);
+        toast.success(`${itemName} added to pantry!`);
     }
     catch(error){
       console.error("Error adding item: ", error);
@@ -326,6 +353,7 @@ export default function Home() {
   >
     <Box sx={style}>
       <Stack direction={'column'}>
+
         <Typography id="modal-modal-title" variant="h6" component="h2">
           Add Item
         </Typography>
@@ -342,17 +370,46 @@ export default function Home() {
           onChange={(e) => setItemName(e.target.value)}
         />
 
-        <input
-            type="file"
-            onChange={handleFileChange}
-            className='mt-4'
-        />
+        {!cameraOpen && (
+                  <input
+                  type="file"
+                  onChange={handleFileChange}
+                  className='mt-4'
+              />
+        )}
+
+        {!cameraOpen && (
+        <Button onClick={() => {setCameraOpen(true)
+          setPhotoTaken(false)
+          setImageFile(null)
+          setCameraPhotoUrl(null)
+        }
+        }>
+          Camera
+        </Button>
+        )}
+
+        {cameraOpen && (
+        <div className="mt-4">
+          <Camera ref={camera} aspectRatio={4 / 3} />
+          <Button onClick={handleTakePhoto}>Take Photo</Button>
+          <Button onClick={() => setCameraOpen(false)}>Close Camera</Button>
+        </div>
+       )}
+
+       {photoTaken && (
+        <img src={cameraPhotoUrl} alt="item" className="w-64 h-64" />
+       )}
+
+        
 
         <Button
           onClick={() => {
             addItem(itemName, imageFile);
             setItemName('');
             setImageFile(null);
+            setCameraPhotoUrl(null);
+            setPhotoTaken(false);
             handleClose();
           }}
           variant="contained" style={{ marginTop: '12px' }}
