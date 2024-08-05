@@ -286,7 +286,7 @@ export default function Home() {
       <ToastContainer limit={5} />
 
       {/* navbar */}
-      <nav className="bg-gray-800 p-4">
+      <nav className="bg-blue-500 p-4">
         <div className="container mx-auto flex justify-between items-center">
           <Stack direction={'row'} spacing={2}>
             <div className="text-white text-2xl font-bold">
@@ -297,11 +297,7 @@ export default function Home() {
 
 
 
-          <div className="lg:hidden">
-            <button className="text-white">
-              &#9776;
-            </button>
-          </div>
+
           <ul className="lg:flex lg:items-center lg:space-x-6 lg:block">
             <li>
               {/* search bar */}
@@ -345,7 +341,7 @@ export default function Home() {
             </li>
 
             <li>
-              <ExitToAppIcon onClick={signOut} className="text-white cursor-pointer hover:text-blue-400" />
+              <ExitToAppIcon onClick={signOut} className="text-white cursor-pointer hover:text-black" />
             </li>
           </ul>
         </div>
@@ -464,9 +460,10 @@ export default function Home() {
       variant={'h6'}
       color={'white'}
       textAlign={'center'}
+      ml={5}
       flex={1}
     >
-      Item Name
+      Item
     </Typography>
     <Typography
       variant={'h6'}
