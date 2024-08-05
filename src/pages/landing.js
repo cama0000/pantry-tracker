@@ -168,8 +168,24 @@ export default function Home() {
     const docRef = doc(firestore, 'users', user.uid, 'items', itemName);
     const docSnap = await getDoc(docRef);
 
-    if(docSnap.exists()){
+    if(docSnap.exists() && open){
       toast.error(`${itemName} already exists in pantry!`);
+      return;
+    }
+    else if(docSnap.exists()){
+      const { count } = docSnap.data();
+      await setDoc(docRef, { ...docSnap.data(), count: count + 1});
+
+      setPantry(prevPantry => prevPantry.map(item =>
+        item.name === itemName ? { ...item, count: count + 1 } : item
+      ));
+
+      setSearchResults(prevSearchResults => prevSearchResults.map(item =>
+        item.name === itemName ? { ...item, count: count + 1} : item
+      ));
+
+      toast.success(`${itemName} added to pantry!`);
+
       return;
     }
 
@@ -203,26 +219,25 @@ export default function Home() {
       if(docSnap.exists()) {
         const { count, image } = docSnap.data();
 
-        // delete image from storage if not default image
-        if(image && image !== '/images/pantry.png'){
-          console.log("IMAGE URL: " + image);
-            const imageRef = ref(storage, `${image}`);
-            await deleteObject(imageRef).catch((error) => {
-                console.error("Error deleting image: ", error);
-                toast.error(`Unable to delete image for ${itemName}`);
-            });
-        }
-  
         if(count === 1) {
           await deleteDoc(docRef);
   
           setPantry(prevPantry => prevPantry.filter(item => item.name !== itemName));
           setSearchResults(prevSearchResults => prevSearchResults.filter(item => item.name !== itemName));
+
+          if(image && image !== '/images/pantry.png'){
+            console.log("IMAGE URL: " + image);
+              const imageRef = ref(storage, `${image}`);
+              await deleteObject(imageRef).catch((error) => {
+                  console.error("Error deleting image: ", error);
+                  toast.error(`Unable to delete image for ${itemName}`);
+              });
+          }
   
           toast.success(`${itemName} removed from pantry!`);
         }
         else {
-          await setDoc(docRef, { count: count - 1 });
+          await setDoc(docRef, { ...docSnap.data(), count: count - 1 });
           setPantry(prevPantry => prevPantry.map(item =>
             item.name === itemName ? { ...item, count: count - 1 } : item
           ));
