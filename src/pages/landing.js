@@ -7,7 +7,8 @@ import { collection, getDocs, getDoc, setDoc, doc, query, deleteDoc } from 'fire
 import AddCircleIcon from '@mui/icons-material/AddCircle';
 import RemoveCircleIcon from '@mui/icons-material/RemoveCircle';
 import ExitToAppIcon from '@mui/icons-material/ExitToApp';
-import OpenAI from 'openai';
+
+import { GoogleGenerativeAI } from "@google/generative-ai";
 
 import { ToastContainer } from 'react-toastify';
 import { toast } from 'react-toastify';
@@ -39,11 +40,6 @@ const style = {
   p: 4
 };
 
-const client = new OpenAI({
-  apiKey: process.env.NEXT_PUBLIC_OPENAI_API_KEY,
-  dangerouslyAllowBrowser: true 
-});
-
 export default function Home() {
   const [pantry, setPantry] = useState([]);
   const [searchResults, setSearchResults] = useState([]);
@@ -56,6 +52,8 @@ export default function Home() {
   const [cameraOpen, setCameraOpen] = useState(false);
   const [photoTaken, setPhotoTaken] = useState(false);
   const [cameraPhotoUrl, setCameraPhotoUrl] = useState(null);
+  const [recipe, setRecipe] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
   const dataURLtoFile = (dataUrl, fileName) => {
     const arr = dataUrl.split(",");
@@ -106,7 +104,7 @@ export default function Home() {
   const getPantryItems = async () => {
     const itemNames = [];
     try {
-      const snapshot = query(collection(firestore, 'pantry'));
+      const snapshot = query(collection(firestore, 'users', user.uid, 'items'));
       const docs = await getDocs(snapshot);
   
       docs.forEach((doc) => {
@@ -119,27 +117,30 @@ export default function Home() {
   };
 
   const generateRecipe = async () => {
+    setIsLoading(true);
     const ingredients = (await getPantryItems()).join(', ');
-    console.log("INGRE: " + ingredients);
+    // console.log("INGREDIENTS: " + ingredients);
 
-    const prompt =  `Here is a list of ingredients I have: ${ingredients}. Please suggest a recipe that can be made using these ingredients.`;
+    const systemPrompt = `You will be a given a list of ingredients. Given these ingredients, create a recipe using all those items.`;
 
-    try {
-      const params = {
-        messages: [{ role: 'user', content: `${prompt}` }],
-        model: 'gpt-3.5-turbo',
-      };
-      const chatCompletion = await client.chat.completions.create(params);
-      return chatCompletion.data.choices[0].message.content.trim();
-    } catch (error) {
-      console.error('Error fetching recipe suggestion:', error);
-      return 'Sorry, I could not generate a recipe at this time.';
-    }
-  };
+    const genAI = new GoogleGenerativeAI(process.env.NEXT_PUBLIC_GEMINI_API_KEY);
 
-  const displayRecipe = async () => {
-    const recipe = await generateRecipe();
-    alert(recipe);
+    const request = `${systemPrompt}\n\nIngredients: ${ingredients}`;
+
+    const model = genAI.getGenerativeModel({
+        model: "gemini-1.0-pro",
+    });
+
+    const result = await model.generateContent(request);
+    const response = result.response.text();
+
+    // console.log("RECIPE: " + response);
+
+    setRecipe(response);
+
+    setIsLoading(false);
+
+    return response;
   };
 
   const updatePantry = async () => {
@@ -161,7 +162,7 @@ export default function Home() {
   };
 
   const addItem = async (itemName, imageUrl) => {
-    console.log("IMAGE URL FIRST RIGHT AFTER PHOTO: " + imageUrl);
+    // console.log("IMAGE URL FIRST RIGHT AFTER PHOTO: " + imageUrl);
 
     if(itemName === ''){
       toast.error('Please enter an item name.');
@@ -199,7 +200,7 @@ export default function Home() {
       imageUrl = await uploadImage(imageFile);
     }
 
-    console.log("IMAGE URL: " + imageUrl);
+    // console.log("IMAGE URL: " + imageUrl);
 
     try{
         await setDoc(docRef, { count: 1, image: `${imageUrl}` });
@@ -229,7 +230,7 @@ export default function Home() {
           setSearchResults(prevSearchResults => prevSearchResults.filter(item => item.name !== itemName));
 
           if(image && image !== '/images/pantry.png'){
-            console.log("IMAGE URL: " + image);
+            // console.log("IMAGE URL: " + image);
               const imageRef = ref(storage, `${image}`);
               await deleteObject(imageRef).catch((error) => {
                   console.error("Error deleting image: ", error);
@@ -437,6 +438,26 @@ export default function Home() {
       </Stack>
     </Box>
   </Modal>
+
+  <Button disabled={isLoading} onClick={generateRecipe}>
+    Craft Recipe
+  </Button>
+
+  {recipe && (
+        <div style={{ marginTop: '20px' }}>
+          <pre
+            style={{
+              backgroundColor: '#3293a8',
+              padding: '15px',
+              borderRadius: '5px',
+              whiteSpace: 'pre-wrap',
+              wordWrap: 'break-word',
+            }}
+          >
+            {recipe}
+          </pre>
+        </div>
+      )}
 
   <AddCircleIcon
   onClick={handleOpen}
